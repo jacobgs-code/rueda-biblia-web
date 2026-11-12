@@ -1,0 +1,17 @@
+{
+  "name": "La Rueda de la Biblia",
+  "short_name": "Rueda Bíblica",
+  "description": "Trivia bíblica para toda la familia: 25 letras, 218 preguntas y hasta 4 jugadores.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#c4b5fd",
+  "theme_color": "#7dd3fc",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
