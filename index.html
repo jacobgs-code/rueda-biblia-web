@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Rueda Bíblica">
 <style>
   @font-face{font-family:'Baloo 2';font-weight:500;font-display:swap;src:url(fonts/baloo2-500.woff2) format('woff2')}
@@ -100,8 +100,9 @@
   .sc .e{font-size:18px}
   .iconbtn{background:rgba(255,255,255,.85);border:none;border-radius:50%;width:40px;height:40px;flex:0 0 40px;font-size:19px;cursor:pointer;box-shadow:0 3px 0 rgba(43,35,80,.12)}
   .iconbtn.off{opacity:.45;filter:grayscale(1)}
-  .toggles{display:flex;gap:8px;justify-content:center;margin-top:10px}
-  .tg{font:inherit;font-weight:800;font-size:16px;border:none;border-radius:999px;padding:5px 14px;cursor:pointer;background:#fff;color:var(--ink);box-shadow:0 4px 0 rgba(43,35,80,.15)}
+  .toggles{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:10px}
+  .tg{font:inherit;font-weight:800;font-size:15px;white-space:nowrap;border:none;border-radius:999px;padding:5px 14px;cursor:pointer;background:#fff;color:var(--ink);box-shadow:0 4px 0 rgba(43,35,80,.15)}
+  .ioshint{display:none;margin:10px auto 0;max-width:420px;background:#fff;border-radius:16px;padding:8px 12px;font-size:15px;font-weight:600;line-height:1.3;box-shadow:0 4px 0 rgba(43,35,80,.15)}
   .tg.off{opacity:.55;text-decoration:line-through}
   .ringwrap{position:relative;width:min(84vw,360px,44vh);aspect-ratio:1;margin:8px auto 2px}
   .lt{position:absolute;width:12.5%;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;
@@ -206,7 +207,8 @@
       <div class="sheep">🐑</div>
       <h1>La Rueda de la Biblia</h1>
       <p>¡Aprende jugando con la ovejita Luz!</p>
-      <div class="toggles"><button class="tg" id="tgmusic">🎵 Música</button><button class="tg" id="tgsfx">🔊 Sonidos</button></div>
+      <div class="toggles"><button class="tg" id="tgmusic">🎵 Música</button><button class="tg" id="tgsfx">🔊 Sonidos</button><button class="tg" id="tgfull" style="display:none">⛶ Pantalla completa</button></div>
+      <div class="ioshint" id="ioshint">📲 Para jugar en pantalla completa en iPhone: toca <b>Compartir</b> <span style="font-size:18px">⬆️</span> y luego <b>Agregar a inicio</b>. Después ábrelo desde el ícono.</div>
     </div>
     <div class="panel">
       <div class="ptitle">👨‍👩‍👧‍👦 Jugadores <span style="font-size:15px;opacity:.6" id="pcount"></span></div>
@@ -722,6 +724,26 @@ if(Plugins.App&&Plugins.App.addListener){
 /* ===== Versión web instalable: funciona sin internet ===== */
 if(!isNative&&location.protocol==='https:'&&'serviceWorker' in navigator){
   try{navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
+}
+
+/* ===== Pantalla completa ===== */
+const standalone=matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches||navigator.standalone===true;
+const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const inFrame=(()=>{try{return window.self!==window.top}catch(e){return true}})();
+if(!isNative&&!standalone){
+  const fsOK=document.fullscreenEnabled||document.webkitFullscreenEnabled;
+  if(fsOK&&!/iPhone|iPod/.test(navigator.userAgent)){ // el iPhone no lo permite en el navegador; ahí se usa "Agregar a inicio"
+    $('tgfull').style.display='';
+    $('tgfull').onclick=()=>{
+      const d=document,el=d.documentElement;
+      try{
+        if(d.fullscreenElement||d.webkitFullscreenElement)(d.exitFullscreen||d.webkitExitFullscreen).call(d);
+        else{const r=(el.requestFullscreen||el.webkitRequestFullscreen).call(el,{navigationUI:'hide'});if(r&&r.catch)r.catch(()=>{});
+          try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock('portrait').catch(()=>{})}catch(e){}}
+      }catch(e){}
+    };
+  }
+  if(isIOS&&!inFrame) $('ioshint').style.display='block';
 }
 
 /* ===== Confeti ===== */

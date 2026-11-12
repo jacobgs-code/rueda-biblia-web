@@ -1,5 +1,5 @@
 // Funciona sin internet: guarda el juego en el teléfono la primera vez que se abre.
-const CACHE = 'rueda-biblia-v1';
+const CACHE = 'rueda-biblia-v2';
 const FILES = ['./', 'index.html', 'questions.js', 'manifest.webmanifest',
   'fonts/baloo2-500.woff2', 'fonts/baloo2-700.woff2', 'fonts/baloo2-800.woff2',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png'];
