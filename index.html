@@ -355,7 +355,20 @@ const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},se
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active');window.scrollTo(0,0)}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active');window.scrollTo(0,0);fit()}
+/* Ajusta el juego a la altura de la pantalla: si la tarjeta no cabe, reduce todo proporcionalmente */
+function fit(){
+  const m=document.querySelector('main'); if(!m) return;
+  const g=$('s-game'), on=g&&g.classList.contains('active');
+  m.style.zoom='';
+  if(!on) return;
+  const card=document.querySelector('#s-game .qcard');
+  const need=card.getBoundingClientRect().bottom+window.scrollY+parseFloat(getComputedStyle(m).paddingBottom||0)+4;
+  const extra=$('fb').classList.contains('show')?0:56; // reserva espacio para el mensaje de acierto/error y así no cambia de tamaño
+  const avail=window.innerHeight;
+  if(need+extra>avail) m.style.zoom=Math.max(.6,avail/(need+extra)).toFixed(3);
+}
+addEventListener('resize',()=>fit());
 
 /* ===== Plataforma nativa (Capacitor) ===== */
 const Cap=window.Capacitor, Plugins=(Cap&&Cap.Plugins)||{};
@@ -597,10 +610,12 @@ function ask(){
   $('judge').style.display=F?'grid':'none';
   $('fb').className='feedback';$('pasarow').style.display='flex';
   paint();
+  fit();
 }
 function showFb(cls,msg,ref,next){
   $('fb').className='feedback show '+cls;$('fbmsg').textContent=msg;$('fbref').textContent=ref;onFbNext=next;
   $('fbnext').textContent=(cls==='good'||!multi())?'Continuar ▶':'Siguiente jugador ▶';
+  fit();
 }
 function resolve(good,btn){
   if(busy) return; busy=true; stopSpeak();
