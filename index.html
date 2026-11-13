@@ -529,16 +529,35 @@ const face=()=>setup.ans==='cara'&&P.length>1;
 const askerOf=i=>(i-1+P.length)%P.length; // cada jugador le pregunta al siguiente
 const pname=(p,i)=>(p.name||'').trim()||`Jugador ${i+1}`;
 
+/* Reparte las preguntas sin repetir ninguna pregunta ni respuesta en la partida
+   y prefiriendo las que no han salido en partidas recientes. */
+const NEAR={peques:['explora'],explora:['peques','sabios'],sabios:['explora']};
+const normA=x=>x.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 function dealQuestions(){
-  // reparte preguntas distintas a jugadores del mismo nivel cuando el banco lo permite
-  const byLvl={};
-  P.forEach(p=>(byLvl[p.lvl]=byLvl[p.lvl]||[]).push(p));
-  Object.entries(byLvl).forEach(([lvl,ps])=>{
-    LETTERS.forEach((L,li)=>{
-      const pool=shuffle(BANK[lvl][L]);
-      ps.forEach((p,k)=>{p.letters[li]={L,q:pool[k%pool.length],st:'new'}});
+  let seen=[]; try{seen=JSON.parse(store.get('rb_seen')||'[]')}catch(e){}
+  const seenSet=new Set(seen), usedQ=new Set(), usedA=new Set();
+  const rank=pool=>shuffle(pool).sort((a,b)=>(seenSet.has(a[1])?1:0)-(seenSet.has(b[1])?1:0));
+  const pickFrom=(pools,strict)=>{
+    for(const pool of pools) for(const q of pool){
+      if(usedQ.has(q[1])) continue;
+      if(strict&&usedA.has(normA(q[2]))) continue;
+      return q;
+    }
+    return null;
+  };
+  // turno por letra: así cada jugador recibe preguntas igual de "frescas"
+  LETTERS.forEach((L,li)=>{
+    shuffle(P.map((p,i)=>i)).forEach(i=>{
+      const p=P[i], own=rank(BANK[p.lvl][L]), near=NEAR[p.lvl].map(l=>rank(BANK[l][L]));
+      const q=pickFrom([own],true)||pickFrom(near,true)||pickFrom([own,...near],false)||pick(BANK[p.lvl][L]);
+      usedQ.add(q[1]); usedA.add(normA(q[2]));
+      p.letters[li]={L,q,st:'new'};
     });
   });
+  // recuerda las últimas preguntas jugadas para no repetirlas en la próxima partida
+  const now=P.flatMap(p=>p.letters.map(s=>s.q[1]));
+  seen=[...now,...seen.filter(t=>!now.includes(t))].slice(0,320);
+  store.set('rb_seen',JSON.stringify(seen));
 }
 function startGame(){
   P=setup.players.map((s,i)=>({name:pname(s,i),av:s.av,lvl:s.lvl,letters:[],cur:0,ok:0,bad:0,

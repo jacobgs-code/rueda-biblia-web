@@ -1,6 +1,6 @@
 # La Rueda de la Biblia
 
-Juego de trivia bíblica para niños y familias: 25 letras, 218 preguntas en 3 niveles de edad y de 1 a 4 jugadores.
+Juego de trivia bíblica para niños y familias: 25 letras, 300 preguntas en 3 niveles de edad y de 1 a 4 jugadores.
 
 **Jugar:** https://jacobgs-code.github.io/rueda-biblia-web/
 
